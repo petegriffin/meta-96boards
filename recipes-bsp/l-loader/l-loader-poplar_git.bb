@@ -1,0 +1,51 @@
+SUMMARY = "Loader to switch from aarch32 to aarch64 and boot"
+
+LICENSE = "GPL"
+LIC_FILES_CHKSUM = "file://COPYING;md5=00ef5534e9238b3296c56a2caa13630c"
+
+COMPATIBLE_MACHINE = "poplar"
+DEPENDS += " atf-poplar"
+
+inherit deploy pythonnative
+
+SRCREV = "dffd94381460ab261a0ec0d2301e7bf26b426bdb"
+
+### DISCLAIMER ###
+# l-loader should be built with an aarch32 toolchain but we target an
+# ARMv8 machine. OE cross-toolchain is aarch64 in this case.
+# We decided to use an external pre-built toolchain in order to build
+# l-loader.
+# knowledgeably, it is a hack...
+###
+SRC_URI = "git://github.com/petegriffin/poplar-l-loader.git;branch=latest \
+           http://releases.linaro.org/components/toolchain/binaries/5.3-2016.02/arm-linux-gnueabihf/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf.tar.xz;name=tc \
+"
+SRC_URI[tc.md5sum] = "01d8860d62807b676762c9c2576dfb22"
+SRC_URI[tc.sha256sum] = "dd66f07662e1f3b555eaa0d076f133b6db702ab0b9ab18f7dfc91a23eab653c5"
+
+S = "${WORKDIR}/git"
+
+do_configure[noexec] = "1"
+
+do_compile() {
+    # Use pre-built aarch32 toolchain
+    export PATH=${WORKDIR}/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin:$PATH
+
+    # bl1 from fip.bin are required from ATF
+    rm -f atf/bl1.bin
+    rm -f arf/fip.bin
+    ln -sf ${STAGING_LIBDIR}/atf/bl1.bin ${S}/atf/bl1.bin
+    ln -sf ${STAGING_LIBDIR}/atf/fip.bin ${S}/atf/fip.bin
+
+    make
+}
+
+do_install() {
+    install -D -p -m0644 l-loader.bin ${D}${libdir}/l-loader/l-loader.bin
+}
+
+do_deploy() {
+    install -D -p -m0644 l-loader.bin ${DEPLOYDIR}/l-loader.bin
+}
+
+addtask deploy before do_build after do_compile
