@@ -1,14 +1,14 @@
 SUMMARY = "Loader to switch from aarch32 to aarch64 and boot"
 
-LICENSE = "GPL"
-LIC_FILES_CHKSUM = "file://COPYING;md5=00ef5534e9238b3296c56a2caa13630c"
+LICENSE = "GPLv2"
+LIC_FILES_CHKSUM = "file://COPYING;md5=e8c1458438ead3c34974bc0be3a03ed6"
 
 COMPATIBLE_MACHINE = "poplar"
 DEPENDS += " atf-poplar"
 
 inherit deploy pythonnative
 
-SRCREV = "dffd94381460ab261a0ec0d2301e7bf26b426bdb"
+SRCREV = "8fcef8490f5652717fefa6706ebffe9f1250b9e8"
 
 ### DISCLAIMER ###
 # l-loader should be built with an aarch32 toolchain but we target an
@@ -17,7 +17,7 @@ SRCREV = "dffd94381460ab261a0ec0d2301e7bf26b426bdb"
 # l-loader.
 # knowledgeably, it is a hack...
 ###
-SRC_URI = "git://github.com/petegriffin/poplar-l-loader.git;branch=latest \
+SRC_URI = "git://github.com/Linaro/poplar-l-loader.git;branch=latest \
            http://releases.linaro.org/components/toolchain/binaries/5.3-2016.02/arm-linux-gnueabihf/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf.tar.xz;name=tc \
 "
 SRC_URI[tc.md5sum] = "01d8860d62807b676762c9c2576dfb22"
@@ -45,7 +45,9 @@ do_install() {
 }
 
 do_deploy() {
-    install -D -p -m0644 l-loader.bin ${DEPLOYDIR}/l-loader.bin
+    install -D -p -m0644 l-loader.bin ${DEPLOYDIR}/fastboot.bin
 }
+
+FILES_${PN} += "${libdir}/l-loader"
 
 addtask deploy before do_build after do_compile
