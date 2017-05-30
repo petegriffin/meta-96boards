@@ -3,7 +3,7 @@ require linux.inc
 DESCRIPTION = "96boards-poplar kernel"
 
 PV = "4.9+git${SRCPV}"
-SRCREV_kernel = "96d75d7335a063e6f35a2ccb7a3b33c6e2458920"
+SRCREV_kernel = "035bdfc09e5c57d85e5b72ac04a588426e44f728"
 SRCREV_FORMAT = "kernel"
 
 SRC_URI = "git://github.com/Linaro/poplar-linux.git;protocol=https;branch=latest;name=kernel \
