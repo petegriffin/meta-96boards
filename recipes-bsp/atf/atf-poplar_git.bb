@@ -13,8 +13,8 @@ SRC_URI = "git://github.com/linaro/poplar-arm-trusted-firmware.git;name=atf;bran
 
 S = "${WORKDIR}/git"
 
-# /usr/lib/edk2/bl1.bin not shipped files. [installed-vs-shipped]
-#INSANE_SKIP_${PN} += "installed-vs-shipped"
+# /usr/lib/atf/bl1.bin not shipped files. [installed-vs-shipped]
+INSANE_SKIP_${PN} += "installed-vs-shipped"
 
 export LDFLAGS=""
 
@@ -34,6 +34,8 @@ do_install() {
     install -D -p -m0644 ${S}/build/${COMPATIBLE_MACHINE}/debug/fip.bin ${D}${libdir}/atf/fip.bin
 }
 
-do_deploy() {
-    install -D -p -m0644 fip.bin ${DEPLOYDIR}/fip.bin
-}
+FILES_${PN} += "${libdir}/atf/*"
+
+#do_deploy() {
+#    install -D -p -m0644 fip.bin ${DEPLOYDIR}/fip.bin
+#}
