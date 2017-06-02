@@ -2,6 +2,8 @@ require linux.inc
 
 DESCRIPTION = "96boards-poplar kernel"
 
+DEPENDS_append = " dosfstools-native mtools-native"
+
 PV = "4.9+git${SRCPV}"
 SRCREV_kernel = "035bdfc09e5c57d85e5b72ac04a588426e44f728"
 SRCREV_FORMAT = "kernel"
@@ -58,4 +60,27 @@ do_configure() {
     bbplain "Saving defconfig to:\n${B}/defconfig"
     oe_runmake -C ${B} savedefconfig
     cp -a ${B}/defconfig ${DEPLOYDIR}
+}
+
+# Create a 64M boot image. block size is 1024. (64*1024=65536)
+BOOT_IMAGE_SIZE = "131072"
+BOOT_IMAGE_BASE_NAME = "boot-${PKGV}-${PKGR}-${MACHINE}-${DATETIME}"
+BOOT_IMAGE_BASE_NAME[vardepsexclude] = "DATETIME"
+
+do_deploy_append() {
+
+    # Create boot image
+    mkfs.vfat -F32 -n "boot" -C ${DEPLOYDIR}/${BOOT_IMAGE_BASE_NAME}.img ${BOOT_IMAGE_SIZE}
+
+    #mmd -i ${DEPLOYDIR}/${BOOT_IMAGE_BASE_NAME}.uefi.img ::EFI
+    #mmd -i ${DEPLOYDIR}/${BOOT_IMAGE_BASE_NAME}.uefi.img ::EFI/BOOT
+
+    mcopy -i ${DEPLOYDIR}/${BOOT_IMAGE_BASE_NAME}.img ${DEPLOYDIR}/${KERNEL_IMAGETYPE} ${KERNEL_IMAGETYPE}
+    mcopy -i ${DEPLOYDIR}/${BOOT_IMAGE_BASE_NAME}.img ${DEPLOYDIR}/Image-hi3798cv200-poplar.dtb Image-hi3798cv200-poplar.dtb
+
+    #mcopy -i ${DEPLOYDIR}/${BOOT_IMAGE_BASE_NAME}.uefi.img ${DEPLOY_DIR_IMAGE}/grubaa64.efi ::EFI/BOOT/grubaa64.efi
+    #chmod 644 ${DEPLOYDIR}/${BOOT_IMAGE_BASE_NAME}.uefi.img
+
+    (cd ${DEPLOYDIR} && ln -sf ${BOOT_IMAGE_BASE_NAME}.img boot-${MACHINE}.img)
+
 }
