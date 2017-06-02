@@ -8,7 +8,7 @@ DEPENDS += " atf-poplar"
 
 inherit deploy pythonnative
 
-SRCREV = "8fcef8490f5652717fefa6706ebffe9f1250b9e8"
+SRCREV = "d6b2e2307896331b380a7627e941760425abb86d"
 
 ### DISCLAIMER ###
 # l-loader should be built with an aarch32 toolchain but we target an
@@ -17,7 +17,7 @@ SRCREV = "8fcef8490f5652717fefa6706ebffe9f1250b9e8"
 # l-loader.
 # knowledgeably, it is a hack...
 ###
-SRC_URI = "git://github.com/Linaro/poplar-l-loader.git;branch=latest \
+SRC_URI = "git://github.com/petegriffin/poplar-l-loader.git;branch=latest \
            http://releases.linaro.org/components/toolchain/binaries/5.3-2016.02/arm-linux-gnueabihf/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf.tar.xz;name=tc \
 "
 SRC_URI[tc.md5sum] = "01d8860d62807b676762c9c2576dfb22"
@@ -41,11 +41,11 @@ do_compile() {
 }
 
 do_install() {
-    install -D -p -m0644 l-loader.bin ${D}${libdir}/l-loader/l-loader.bin
+    install -D -p -m0644 fastboot.bin ${D}${libdir}/l-loader/fastboot.bin
 }
 
 do_deploy() {
-    install -D -p -m0644 l-loader.bin ${DEPLOYDIR}/fastboot.bin
+    install -D -p -m0644 fastboot.bin ${DEPLOYDIR}/fastboot.bin
 }
 
 FILES_${PN} += "${libdir}/l-loader"
