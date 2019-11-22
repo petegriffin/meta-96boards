@@ -1,0 +1,26 @@
+From 8acbca5357407fc4447e331b6023ae8cbd1c1d89 Mon Sep 17 00:00:00 2001
+From: Peter Griffin <peter.griffin@linaro.org>
+Date: Fri, 22 Nov 2019 10:37:40 +0100
+Subject: [PATCH] Revert "arm64: dts: hikey: Enable SDIO high-speed mode on
+ WL1835 module"
+
+This reverts commit aef03cc72b049315fb31cd67388264c14fb53815.
+---
+ arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts b/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts
+index b21ed15..c14205c 100644
+--- a/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts
++++ b/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts
+@@ -321,7 +321,6 @@
+ 
+ 		dwmmc_2: dwmmc2@f723f000 {
+ 			bus-width = <0x4>;
+-			cap-sd-highspeed;
+ 			non-removable;
+ 			cap-power-off-card;
+ 			vmmc-supply = <&reg_vdd_3v3>;
+-- 
+2.7.4
+

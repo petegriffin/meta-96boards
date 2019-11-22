@@ -1,0 +1,49 @@
+From b44d13885ad0c827665a8d5a5ad78bcc424b03ff Mon Sep 17 00:00:00 2001
+From: Peter Griffin <peter.griffin@linaro.org>
+Date: Fri, 22 Nov 2019 12:12:50 +0100
+Subject: [PATCH] hi6220-hikey: disabled wifi sdio dt node
+
+It is causing my board to hang at bootup
+
+[  OK  ] Started udev Kernel Device Manager.
+         Starting Network Service...
+[  OK  ] Started Network Serv[    6.562170] dwmmc_k3 f723f000.dwmmc2: fifo-depth property not found, using value of FIFOTH ret
+ice.
+[    6.565959] VDD_3V3: supplied by SYS_5V
+[    6.589743] 5V_HUB: supplied by SYS_5V
+[    6.589951] dwmmc_k3 f723f000.dwmmc2: IDMAC supports 32-bit address mode.
+[    6.615100] dwmmc_k3 f723f000.dwmmc2: Using internal DMA controller.
+[    6.621551] dwmmc_k3 f723f000.dwmmc2: Version ID is 250a
+         Starting[    6.638312] dwmmc_k3 f723f000.dwmmc2: DW MMC controller at irq 43,32 bit host data width,128 deep fifo
+ Networ[    6.649268] dwmmc_k3 f723f000.dwmmc2: allocated mmc-pwrseq
+k Name Resolutio[    6.655963] mmc_host mmc2: card is non-removable.
+n...
+         Starting Wait for Network to be Configured...
+[    6.694700] mmc_host mmc2: Bus speed (slot 0) = 24800000Hz (slot req 400000Hz, actual 400000HZ div = 31)
+[    6.721899] dwmmc_k3 f723f000.dwmmc2: card claims to support voltages below defined range
+[    6.734235] usbcore: registered new interface driver usbfs
+[  OK      6.740240] usbcore: registered new interface driver hub
+m] Found device [    6.744239] mmc_host mmc2: Bus speed (slot 0) = 24800000Hz (slot req 25000000Hz, actual 24800000HZ div = 0)
+/dev/ttyAMA3.
+[    6.759469] usbcore: registered new device driver usb
+
+Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+---
+ arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts b/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts
+index b21ed15..f52ee62 100644
+--- a/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts
++++ b/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts
+@@ -320,6 +320,7 @@
+ 		};
+ 
+ 		dwmmc_2: dwmmc2@f723f000 {
++                        status = "disabled";
+ 			bus-width = <0x4>;
+ 			cap-sd-highspeed;
+ 			non-removable;
+-- 
+2.7.4
+

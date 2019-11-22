@@ -1,0 +1,118 @@
+From e67a9c141bce2a2f2fafee029e0bad4aad6efc91 Mon Sep 17 00:00:00 2001
+From: Peter Griffin <peter.griffin@linaro.org>
+Date: Thu, 21 Nov 2019 14:00:12 +0100
+Subject: [PATCH] Kbuild: update to $(srctree)/$(src) so the build succedes
+
+When building with OE $(src) ends up being relative
+which means none of headers are actually included.
+
+Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+---
+ drivers/gpu/arm/utgard/Kbuild | 32 +++++++++++++++++---------------
+ 1 file changed, 17 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/gpu/arm/utgard/Kbuild b/drivers/gpu/arm/utgard/Kbuild
+index f72d17a..6c38961 100644
+--- a/drivers/gpu/arm/utgard/Kbuild
++++ b/drivers/gpu/arm/utgard/Kbuild
+@@ -24,7 +24,7 @@ MALI_ENABLE_CPU_CYCLES ?= 0
+ 
+ # For customer releases the Linux Device Drivers will be provided as ARM proprietary and GPL releases:
+ # The in-tree driver will only use the GPL releases.
+-ccflags-y += -I$(src)/linux/license/gpl
++ccflags-y += -I$(srctree)/$(src)/linux/license/gpl
+ 
+ ifeq ($(USING_GPU_UTILIZATION), 1)
+     ifeq ($(USING_DVFS), 1)
+@@ -36,7 +36,7 @@ ifeq ($(MALI_PLATFORM_FILES),)
+ ifeq ($(CONFIG_ARCH_EXYNOS4),y)
+ EXTRA_DEFINES += -DMALI_FAKE_PLATFORM_DEVICE=1
+ export MALI_PLATFORM=exynos4
+-export MALI_PLATFORM_FILES_BUILDIN = $(notdir $(wildcard $(src)/platform/$(MALI_PLATFORM)/*.c))
++export MALI_PLATFORM_FILES_BUILDIN = $(notdir $(wildcard $(srctree)/$(src)/platform/$(MALI_PLATFORM)/*.c))
+ export MALI_PLATFORM_FILES_ADD_PREFIX = $(addprefix platform/$(MALI_PLATFORM)/,$(MALI_PLATFORM_FILES_BUILDIN)) 
+ endif
+ endif
+@@ -119,7 +119,7 @@ mali-y += \
+ 	linux/mali_pmu_power_up_down.o \
+ 	__malidrv_build_info.o
+ 
+-ifneq ($(wildcard $(src)/linux/mali_slp_global_lock.c),)
++ifneq ($(wildcard $(srctree)/$(src)/linux/mali_slp_global_lock.c),)
+ 	mali-y += linux/mali_slp_global_lock.o
+ endif
+ 
+@@ -134,7 +134,7 @@ mali-$(CONFIG_MALI400_PROFILING) += linux/mali_ukk_profiling.o
+ mali-$(CONFIG_MALI400_PROFILING) += linux/mali_osk_profiling.o
+ 
+ mali-$(CONFIG_MALI400_INTERNAL_PROFILING) += linux/mali_profiling_internal.o timestamp-$(TIMESTAMP)/mali_timestamp.o
+-ccflags-$(CONFIG_MALI400_INTERNAL_PROFILING) += -I$(src)/timestamp-$(TIMESTAMP)
++ccflags-$(CONFIG_MALI400_INTERNAL_PROFILING) += -I$(srctree)/$(src)/timestamp-$(TIMESTAMP)
+ 
+ mali-$(CONFIG_DMA_SHARED_BUFFER) += linux/mali_memory_dma_buf.o
+ mali-$(CONFIG_DMA_SHARED_BUFFER) += linux/mali_memory_secure.o
+@@ -170,19 +170,19 @@ endif
+ 
+ #build-in include path is different
+ ifeq ($(MALI_PLATFORM_FILES),)
+-ccflags-$(CONFIG_MALI400_UMP) += -I$(src)/../ump/include/
++ccflags-$(CONFIG_MALI400_UMP) += -I$(srctree)/$(src)/../ump/include/
+ else
+-ccflags-$(CONFIG_MALI400_UMP) += -I$(src)/../../ump/include/ump
++ccflags-$(CONFIG_MALI400_UMP) += -I$(srctree)/$(src)/../../ump/include/ump
+ endif
+ ccflags-$(CONFIG_MALI400_DEBUG) += -DDEBUG
+ 
+ # Use our defines when compiling
+-ccflags-y += -I$(src) -I$(src)/include -I$(src)/common -I$(src)/linux -I$(src)/platform -Wno-date-time
++ccflags-y += -I$(srctree)/$(src) -I$(srctree)/$(src)/include -I$(srctree)/$(src)/common -I$(srctree)/$(src)/linux -I$(srctree)/$(src)/platform -Wno-date-time
+ 
+ # Get subversion revision number, fall back to only ${MALI_RELEASE_NAME} if no svn info is available
+-MALI_RELEASE_NAME=$(shell cat $(src)/.version 2> /dev/null)
++MALI_RELEASE_NAME=$(shell cat $(srctree)/$(src)/.version 2> /dev/null)
+ 
+-SVN_INFO = (cd $(src); svn info 2>/dev/null)
++SVN_INFO = (cd $(srctree)/$(src); svn info 2>/dev/null)
+ 
+ ifneq ($(shell $(SVN_INFO) 2>/dev/null),)
+ # SVN detected
+@@ -193,13 +193,13 @@ CHANGED_REVISION := $(shell $(SVN_INFO) | grep '^Last Changed Rev: ' | cut -d: -
+ REPO_URL := $(shell $(SVN_INFO) | grep '^URL: ' | cut -d: -f2- | cut -b2-)
+ 
+ else # SVN
+-GIT_REV := $(shell cd $(src); git describe --always 2>/dev/null)
++GIT_REV := $(shell cd $(srctree)/$(src); git describe --always 2>/dev/null)
+ ifneq ($(GIT_REV),)
+ # Git detected
+ DRIVER_REV := $(MALI_RELEASE_NAME)-$(GIT_REV)
+-CHANGE_DATE := $(shell cd $(src); git log -1 --format="%ci")
++CHANGE_DATE := $(shell cd $(srctree)/$(src); git log -1 --format="%ci")
+ CHANGED_REVISION := $(GIT_REV)
+-REPO_URL := $(shell cd $(src); git describe --all --always 2>/dev/null)
++REPO_URL := $(shell cd $(srctree)/$(src); git describe --all --always 2>/dev/null)
+ 
+ else # Git
+ # No Git or SVN detected
+@@ -211,8 +211,10 @@ endif
+ 
+ ccflags-y += -DSVN_REV_STRING=\"$(DRIVER_REV)\"
+ 
++subdir-ccflags-y += $(ccflags-y)
++
+ VERSION_STRINGS :=
+-VERSION_STRINGS += API_VERSION=$(shell cd $(src); grep "\#define _MALI_API_VERSION" $(FILES_PREFIX)include/linux/mali/mali_utgard_uk_types.h | cut -d' ' -f 3 )
++VERSION_STRINGS += API_VERSION=$(shell cd $(srctree)/$(src); grep "\#define _MALI_API_VERSION" $(FILES_PREFIX)include/linux/mali/mali_utgard_uk_types.h | cut -d' ' -f 3 )
+ VERSION_STRINGS += REPO_URL=$(REPO_URL)
+ VERSION_STRINGS += REVISION=$(DRIVER_REV)
+ VERSION_STRINGS += CHANGED_REVISION=$(CHANGED_REVISION)
+@@ -236,5 +238,5 @@ VERSION_STRINGS += USING_DMA_BUF_FENCE = $(CONFIG_MALI_DMA_BUF_FENCE)
+ VERSION_STRINGS += MALI_UPPER_HALF_SCHEDULING=$(MALI_UPPER_HALF_SCHEDULING)
+ 
+ # Create file with Mali driver configuration
+-$(src)/__malidrv_build_info.c:
+-	@echo 'const char *__malidrv_build_info(void) { return "malidrv: $(VERSION_STRINGS)";}' > $(src)/__malidrv_build_info.c
++$(srctree)/$(src)/__malidrv_build_info.c:
++	@echo 'const char *__malidrv_build_info(void) { return "malidrv: $(VERSION_STRINGS)";}' > $(srctree)/$(src)/__malidrv_build_info.c
+-- 
+2.7.4
+

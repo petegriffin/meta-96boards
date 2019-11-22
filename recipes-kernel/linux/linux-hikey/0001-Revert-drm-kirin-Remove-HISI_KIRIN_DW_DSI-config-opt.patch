@@ -1,0 +1,50 @@
+From b6fc7e3ec47ef73e8559c6cdf252d6558639c730 Mon Sep 17 00:00:00 2001
+From: Peter Griffin <peter.griffin@linaro.org>
+Date: Wed, 20 Nov 2019 16:28:22 +0100
+Subject: [PATCH] Revert "drm: kirin: Remove HISI_KIRIN_DW_DSI config option"
+
+This reverts commit 55e9e27e40db71866d5caed43c96eddce3d50d03.
+---
+ drivers/gpu/drm/hisilicon/kirin/Kconfig  | 10 +++++++++-
+ drivers/gpu/drm/hisilicon/kirin/Makefile |  4 ++--
+ 2 files changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/hisilicon/kirin/Kconfig b/drivers/gpu/drm/hisilicon/kirin/Kconfig
+index 290553e..0fa29af 100644
+--- a/drivers/gpu/drm/hisilicon/kirin/Kconfig
++++ b/drivers/gpu/drm/hisilicon/kirin/Kconfig
+@@ -5,8 +5,16 @@ config DRM_HISI_KIRIN
+ 	select DRM_KMS_HELPER
+ 	select DRM_GEM_CMA_HELPER
+ 	select DRM_KMS_CMA_HELPER
+-	select DRM_MIPI_DSI
++	select HISI_KIRIN_DW_DSI
+ 	help
+ 	  Choose this option if you have a hisilicon Kirin chipsets(hi6220).
+ 	  If M is selected the module will be called kirin-drm.
+ 
++config HISI_KIRIN_DW_DSI
++	tristate "HiSilicon Kirin specific extensions for Synopsys DW MIPI DSI"
++	depends on DRM_HISI_KIRIN
++	select DRM_MIPI_DSI
++	help
++	 This selects support for HiSilicon Kirin SoC specific extensions for
++	 the Synopsys DesignWare DSI driver. If you want to enable MIPI DSI on
++	 hi6220 based SoC, you should selet this option.
+diff --git a/drivers/gpu/drm/hisilicon/kirin/Makefile b/drivers/gpu/drm/hisilicon/kirin/Makefile
+index c50606c..c0501fa 100644
+--- a/drivers/gpu/drm/hisilicon/kirin/Makefile
++++ b/drivers/gpu/drm/hisilicon/kirin/Makefile
+@@ -1,7 +1,7 @@
+ # SPDX-License-Identifier: GPL-2.0-only
+ kirin-drm-y := kirin_drm_drv.o \
+-	       kirin_drm_ade.o \
+-	       dw_drm_dsi.o
++	       kirin_drm_ade.o
+ 
+ obj-$(CONFIG_DRM_HISI_KIRIN) += kirin-drm.o
+ 
++obj-$(CONFIG_HISI_KIRIN_DW_DSI) += dw_drm_dsi.o
+-- 
+2.7.4
+
